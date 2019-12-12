@@ -2,10 +2,10 @@ from data_recorder.connector_components .book import Book, round_price
 from configurations.configs import RECORD_DATA
 
 
-class CoinbaseBook(Book):
+class BitpandaBook(Book):
 
     def __init__(self, sym, side):
-        super(CoinbaseBook, self).__init__(sym, side)
+        super(BitpandaBook, self).__init__(sym, side)
 
     def insert_order(self, msg):
         """

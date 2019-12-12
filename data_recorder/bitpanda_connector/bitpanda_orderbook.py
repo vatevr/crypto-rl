@@ -5,10 +5,10 @@ import requests
 import numpy as np
 
 
-class CoinbaseOrderBook(OrderBook):
+class BitpandaOrderBook(OrderBook):
 
     def __init__(self, sym):
-        super(CoinbaseOrderBook, self).__init__(sym, 'coinbase')
+        super(BitpandaOrderBook, self).__init__(sym, 'coinbase')
         self.sequence = 0
         self.diff = 0
 
