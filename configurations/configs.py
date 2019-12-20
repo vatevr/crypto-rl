@@ -12,6 +12,7 @@ BASKET = [('BTC-USD', 'tBTCUSD'),
 # ./data_recorder/connector_components/client.py
 COINBASE_ENDPOINT = 'wss://ws-feed.pro.coinbase.com'
 BITFINEX_ENDPOINT = 'wss://api.bitfinex.com/ws/2'
+BITPANDA_ENDPOINT = 'wss://streams.exchange.bitpanda.com'
 MAX_RECONNECTION_ATTEMPTS = 300
 
 
