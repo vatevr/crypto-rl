@@ -14,6 +14,7 @@ class BitpandaClient(Client):
         while True:
             msg = self.queue.get()
 
+            # Treat PRICE_TICK_HISTORY and ORDERBOOK_UPDATE and
             if self.book.new_tick(msg) is False:
                 self.book.load_book()
                 self.retry_counter += 1

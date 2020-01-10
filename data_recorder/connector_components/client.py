@@ -102,6 +102,11 @@ class Client(Thread):
                 output = json.loads(await self.ws.recv())
                 print('Client - Bitfinex: Unsubscribe successful %s' % output)
 
+        elif self.exchange == 'bitpanda':
+            await self.ws.send(self.request_unsubscribe)
+            output = json.loads(await self.ws.recv())
+            print('Client - bitpanda: Unsubscribe successful %s' % output)
+
     async def subscribe(self):
         """
         Subscribe to full order book
