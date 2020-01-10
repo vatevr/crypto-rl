@@ -3,11 +3,14 @@ import time
 from datetime import datetime as dt
 from multiprocessing import Queue
 from threading import Thread
+
 import websockets
-from data_recorder.bitfinex_connector.bitfinex_orderbook import BitfinexOrderBook
-from data_recorder.coinbase_connector.coinbase_orderbook import CoinbaseOrderBook
+
 from configurations.configs import MAX_RECONNECTION_ATTEMPTS, COINBASE_ENDPOINT, \
-    BITFINEX_ENDPOINT
+    BITFINEX_ENDPOINT, BITPANDA_ENDPOINT
+from data_recorder.bitfinex_connector.bitfinex_orderbook import BitfinexOrderBook
+from data_recorder.bitpanda_connector.bitpanda_orderbook import BitpandaOrderbook
+from data_recorder.coinbase_connector.coinbase_orderbook import CoinbaseOrderBook
 
 
 class Client(Thread):
@@ -56,6 +59,27 @@ class Client(Thread):
             self.book = BitfinexOrderBook(self.sym)
             self.ws_endpoint = BITFINEX_ENDPOINT
 
+        elif self.exchange == 'bitpanda':
+            self.request = json.dumps({
+                "type": "subscribe",
+                "channels": [
+                    {
+                        "name": "ORDER_BOOK",
+                        "instrument_codes": [self.sym]
+                    },
+                    {
+                        "name": "PRICE_TICKS",
+                        "instrument_codes": [self.sym]
+                    }
+                ]
+            })
+
+            self.request_unsubscribe = json.dumps(dict(type='unsubscribe',
+                                                       channels=["PRICE_TICKS", "ORDER_BOOK"]))
+            self.trades_request = None
+            self.book = BitpandaOrderbook(self.sym)
+            self.ws_endpoint = BITPANDA_ENDPOINT
+
     async def unsubscribe(self):
         """
         Unsubscribe limit order book websocket from exchange
@@ -77,6 +101,11 @@ class Client(Thread):
                 await self.ws.send(request_unsubscribe)
                 output = json.loads(await self.ws.recv())
                 print('Client - Bitfinex: Unsubscribe successful %s' % output)
+
+        elif self.exchange == 'bitpanda':
+            await self.ws.send(self.request_unsubscribe)
+            output = json.loads(await self.ws.recv())
+            print('Client - bitpanda: Unsubscribe successful %s' % output)
 
     async def subscribe(self):
         """

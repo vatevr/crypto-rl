@@ -1,5 +1,6 @@
 from data_recorder.coinbase_connector.coinbase_book import CoinbaseBook
 from data_recorder.bitfinex_connector.bitfinex_book import BitfinexBook
+from data_recorder.bitpanda_connector.bitpanda_book import BitpandaBook
 from data_recorder.connector_components.trade_tracker import TradeTracker
 from data_recorder.database.database import Database
 from configurations.configs import INCLUDE_ORDERFLOW
@@ -8,6 +9,25 @@ import numpy as np
 
 
 class OrderBook(ABC):
+    @staticmethod
+    def book_bid_creator(exchange, ccy):
+        books_by_name = {
+            'coinbase': CoinbaseBook(ccy, 'bids'),
+            'bitfinex': BitfinexBook(ccy, 'bids'),
+            'bitpanda': BitpandaBook(ccy, 'bids'),
+        }
+
+        return books_by_name[exchange]
+
+    @staticmethod
+    def book_ask_creator(exchange, ccy):
+        books_by_name = {
+            'coinbase': CoinbaseBook(ccy, 'asks'),
+            'bitfinex': BitfinexBook(ccy, 'asks'),
+            'bitpanda': BitpandaBook(ccy, 'asks'),
+        }
+
+        return books_by_name[exchange]
 
     def __init__(self, ccy, exchange):
         """
@@ -19,10 +39,10 @@ class OrderBook(ABC):
         self.sym = ccy
         self.db = Database(sym=ccy, exchange=exchange)
         self.db.init_db_connection()
-        self.bids = CoinbaseBook(ccy, 'bids') if exchange == 'coinbase' else BitfinexBook(
-            ccy, 'bids')
-        self.asks = CoinbaseBook(ccy, 'asks') if exchange == 'coinbase' else BitfinexBook(
-            ccy, 'asks')
+
+        self.bids = OrderBook.book_bid_creator(exchange=exchange, ccy=ccy)
+        self.asks = OrderBook.book_ask_creator(exchange=exchange, ccy=ccy)
+
         self.midpoint = float()
         self.buy_tracker = TradeTracker()
         self.sell_tracker = TradeTracker()

@@ -1,4 +1,5 @@
 from data_recorder.bitfinex_connector.bitfinex_client import BitfinexClient
+from data_recorder.bitpanda_connector.bitpanda_client import BitpandaClient
 from data_recorder.coinbase_connector.coinbase_client import CoinbaseClient
 from configurations.configs import SNAPSHOT_RATE, BASKET
 from threading import Timer
@@ -34,15 +35,17 @@ class Recorder(Process):
         New process created to instantiate limit order books for
             (1) Coinbase Pro, and
             (2) Bitfinex.
+            (3) Bitpanda.
         Connections made to each exchange are made asynchronously thanks to asyncio.
         :return: void
         """
-        coinbase, bitfinex = self.symbols
+        coinbase, bitfinex, bitpanda = self.symbols
 
         self.workers[coinbase] = CoinbaseClient(coinbase)
         self.workers[bitfinex] = BitfinexClient(bitfinex)
+        self.workers[bitpanda] = BitpandaClient(bitpanda)
 
-        self.workers[coinbase].start(), self.workers[bitfinex].start()
+        self.workers[coinbase].start(), self.workers[bitfinex].start(), self.workers[bitpanda].start()
 
         Timer(5.0, self.timer_worker,
               args=(self.workers[coinbase], self.workers[bitfinex],)).start()
